@@ -323,7 +323,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ea3460d58284736a78872e359191f73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 150
+  maxHealth: 300
   attackRange: 15
   fireRate: 5
   rotationSpeed: 10

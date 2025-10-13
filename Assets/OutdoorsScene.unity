@@ -1250,7 +1250,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -2439,10 +2439,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startingMoney: 100
-  projectileTowerCost: 50
-  resourceTowerCost: 70
-  laserTowerCost: 100
-  aoeTowerCost: 60
+  projectileTowerCost: 0
+  resourceTowerCost: 0
+  laserTowerCost: 0
+  aoeTowerCost: 0
 --- !u!4 &1745309053
 Transform:
   m_ObjectHideFlags: 0
@@ -2492,6 +2492,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   preparationTime: 30
   baseWaveCredits: 50
+  tankHeadstartDelay: 3.5
   enemyTypes:
   - name: Regular
     enemyPrefab: {fileID: 4487925157323236673, guid: 7292896ae5dd55c42b769433af716d38,
@@ -2502,18 +2503,12 @@ MonoBehaviour:
     enemyPrefab: {fileID: 4487925157323236673, guid: 8a1650f62e067ae47ac765f379648eab,
       type: 3}
     cost: 8
-    baseSpawnWeight: 30
+    baseSpawnWeight: 51.2
   - name: Tank
     enemyPrefab: {fileID: 4487925157323236673, guid: c86fdacabcb6a0e45a58f7be3d94efdf,
       type: 3}
     cost: 20
-    baseSpawnWeight: 20
-  weightModifiers:
-    vsResourceTowers_FastEnemy_Modifier: 1.5
-    vsMortarTowers_TankEnemy_Modifier: 1.5
-    vsMortarTowers_FastEnemy_Reducer: 0.5
-    vsLaserTowers_TankEnemy_Reducer: 0.5
-    vsLaserTowers_Swarm_Modifier: 1.25
+    baseSpawnWeight: 1.8
 --- !u!1 &1747971571
 GameObject:
   m_ObjectHideFlags: 0

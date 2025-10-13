@@ -1445,15 +1445,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a684dbc3626348ceb1b4981fc7cee4c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  maxHealth: 200
   attackRange: 15
   fireRate: 1
   rotationSpeed: 10
   partToRotate: {fileID: 1948436055725293266}
-  threatValue: 12
+  threatValue: 6
   healthBar: {fileID: 7507784578408740034}
   damageOverTime: 60
   firePoint: {fileID: 4274120026067934643}
+  targetAcquisitionDelay: 1
   impactEffect: {fileID: 0}
 --- !u!1 &8859866622268763616
 GameObject:

@@ -1,6 +1,14 @@
+
+using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq; // Used for sorting and summing
+
+public class WaveComposition
+{
+    public List<GameObject> TanksToSpawn = new List<GameObject>();
+    public List<GameObject> OtherEnemiesToSpawn = new List<GameObject>();
+}
 
 public class WaveManager : MonoBehaviour
 {
@@ -12,10 +20,11 @@ public class WaveManager : MonoBehaviour
     [Header("Wave Configuration")]
     [SerializeField] private float preparationTime = 30f;
     [SerializeField] private int baseWaveCredits = 50;
+    [SerializeField] private float tankHeadstartDelay = 2.0f; // Delay after tanks spawn
     [SerializeField] private List<EnemySpawnData> enemyTypes = new List<EnemySpawnData>();
-    [SerializeField] private TowerWeightModifier weightModifiers;
+    // [SerializeField] private TowerWeightModifier weightModifiers;
     
-//A private list to dynamically hold the registered spawn points.
+    //A private list to dynamically hold the registered spawn points.
     private List<Transform> spawnPoints = new List<Transform>();
 
     private int waveNumber = 0;
@@ -55,7 +64,8 @@ public class WaveManager : MonoBehaviour
             // Clean up list of destroyed enemies
             activeEnemies.RemoveAll(enemy => enemy == null);
 
-            if (activeEnemies.Count == 0)
+            // FIX: Check if activeEnemies is not null before checking count, to be safe.
+            if (activeEnemies != null && activeEnemies.Count == 0)
             {
                 EndCombatPhase();
             }
@@ -98,34 +108,33 @@ public class WaveManager : MonoBehaviour
         UIManager.Instance.UpdateCountdownText(0);
         Debug.Log($"Starting Combat for Wave {waveNumber}");
 
-        // Generate and spawn the wave
-        List<GameObject> waveComposition = GenerateWave();
-        SpawnWave(waveComposition);
+        //Generate the wave and pass the sorted composition to the spawner
+        WaveComposition waveComposition = GenerateWave();
+        StartCoroutine(SpawnWaveRoutine(waveComposition));
     }
 
     private void EndCombatPhase()
     {
         CurrentState = WaveState.WaveComplete;
         Debug.Log($"Wave {waveNumber} Complete!");
-        // Optional: Add a small delay before starting the next prep phase
+        // Add a small delay before starting the next prep phase
         Invoke("StartPreparationPhase", 3f);
     }
     
-    private List<GameObject> GenerateWave()
+    private WaveComposition GenerateWave()
     {
-        // Calculate Credits
-        int towerThreat = CalculateTowerThreat();
-        int totalCredits = (baseWaveCredits * waveNumber) + towerThreat;
-        Debug.Log($"This wave has {totalCredits} credits. (Base: {baseWaveCredits * waveNumber}, Tower Threat: {towerThreat})");
-
-        // Calculate Weights
+        int totalCredits = CalculateWaveCredits(); // Extracted calculation to a new method for cleanliness
         Dictionary<GameObject, float> adjustedWeights = CalculateEnemyWeights();
 
-        // Purchase enemies
-        List<GameObject> waveComposition = new List<GameObject>();
-        
-        // Need to sort for when we have 19 or less credits to prevent wastage of credits
-        var sortedEnemyTypes = enemyTypes.OrderByDescending(e => e.cost).ToList(); // Prioritize expensive units
+        // The list of enemies we will "purchase"
+        List<GameObject> purchasedEnemies = new List<GameObject>();
+        // FIX: Ensure enemyTypes is not empty to prevent errors on Min()
+        if (enemyTypes == null || enemyTypes.Count == 0)
+        {
+            Debug.LogError("No enemy types configured in WaveManager!");
+            return new WaveComposition(); // Return an empty wave
+        }
+        var sortedEnemyTypes = enemyTypes.OrderByDescending(e => e.cost).ToList();
         int cheapestCost = enemyTypes.Min(e => e.cost);
 
         while (totalCredits >= cheapestCost)
@@ -135,7 +144,8 @@ public class WaveManager : MonoBehaviour
 
             if (totalCredits >= enemyData.cost)
             {
-                waveComposition.Add(enemyToSpawn);
+                // FIX: Added to the correct list 'purchasedEnemies' instead of the non-existent 'waveComposition'.
+                purchasedEnemies.Add(enemyToSpawn);
                 totalCredits -= enemyData.cost;
             }
             else
@@ -146,7 +156,8 @@ public class WaveManager : MonoBehaviour
                 {
                     if (totalCredits >= cheaperEnemy.cost)
                     {
-                        waveComposition.Add(cheaperEnemy.enemyPrefab);
+                        // FIX: Added to the correct list 'purchasedEnemies'.
+                        purchasedEnemies.Add(cheaperEnemy.enemyPrefab);
                         totalCredits -= cheaperEnemy.cost;
                         foundCheaper = true;
                         break;
@@ -155,8 +166,31 @@ public class WaveManager : MonoBehaviour
                 if (!foundCheaper) break; // Can't afford anything else
             }
         }
-        Debug.Log($"Generated wave with {waveComposition.Count} enemies.");
-        return waveComposition;
+        // FIX: Logged the count from the correct list 'purchasedEnemies'.
+        Debug.Log($"Generated wave with {purchasedEnemies.Count} enemies.");
+        
+        // Now, sort the purchased enemies into tanks and others.
+        WaveComposition finalComposition = new WaveComposition();
+        foreach (var enemyPrefab in purchasedEnemies)
+        {
+            if (enemyPrefab.GetComponent<TankEnemy>())
+            {
+                finalComposition.TanksToSpawn.Add(enemyPrefab);
+            }
+            else
+            {
+                finalComposition.OtherEnemiesToSpawn.Add(enemyPrefab);
+            }
+        }
+        return finalComposition;
+    }
+
+    private int CalculateWaveCredits()
+    {
+        int towerThreat = CalculateTowerThreat();
+        int totalCredits = (baseWaveCredits * waveNumber) + towerThreat;
+        Debug.Log($"This wave has {totalCredits} credits. (Base: {baseWaveCredits * waveNumber}, Tower Threat: {towerThreat})");
+        return totalCredits;
     }
 
     private int CalculateTowerThreat()
@@ -172,34 +206,66 @@ public class WaveManager : MonoBehaviour
 
     private Dictionary<GameObject, float> CalculateEnemyWeights()
     {
-        // Count tower types from the previous wave
-        int resourceTowers = FindObjectsOfType<ResourceTower>().Length;
-        int mortarTowers = FindObjectsOfType<AoETower>().Length;
-        int laserTowers = FindObjectsOfType<LaserTower>().Length;
+        // --- STEP 1: CALCULATE TOTAL THREAT PER CATEGORY ---
+        // This now dynamically calculates threat by iterating through towers,
+        // using their actual 'threatValue' instead of hardcoded numbers.
+        float totalResourceThreat = 0;
+        float totalMortarThreat = 0;
+        float totalLaserThreat = 0;
 
-        Dictionary<GameObject, float> weights = new Dictionary<GameObject, float>();
-        foreach(var enemyData in enemyTypes)
+        BaseTower[] allTowers = FindObjectsOfType<BaseTower>();
+        foreach(var tower in allTowers)
         {
-            float currentWeight = enemyData.baseSpawnWeight;
+            if (tower is ResourceTower) totalResourceThreat += tower.threatValue;
+            else if (tower is AoETower) totalMortarThreat += tower.threatValue;
+            else if (tower is LaserTower) totalLaserThreat += tower.threatValue;
+        }
 
-            // Apply modifiers based on tower counts
+        // The grand total of all specialist threats. This is our denominator.
+        float grandTotalThreat = totalResourceThreat + totalMortarThreat + totalLaserThreat;
+        if (grandTotalThreat < 1) grandTotalThreat = 1; // Prevent division by zero
+
+    
+        // --- STEP 2: CALCULATE A DIRECT, PROPORTIONAL BONUS FOR EACH COUNTER ---
+        Dictionary<GameObject, float> weights = new Dictionary<GameObject, float>();
+    
+        // This value determines how strongly the AI reacts to your strategy.
+        const float COUNTER_POTENCY = 500f; 
+
+        foreach (var enemyData in enemyTypes)
+        {
+            float counterBonus = 0;
+        
+            // Fast Enemies get a bonus directly proportional to the Resource Tower threat.
             if (enemyData.enemyPrefab.GetComponent<FastEnemy>())
             {
-                if (resourceTowers > 2) currentWeight *= weightModifiers.vsResourceTowers_FastEnemy_Modifier;
-                if (mortarTowers > 1) currentWeight *= weightModifiers.vsMortarTowers_FastEnemy_Reducer;
-                if (laserTowers > 1) currentWeight *= weightModifiers.vsLaserTowers_Swarm_Modifier;
+                float resourceRatio = totalResourceThreat / grandTotalThreat;
+                counterBonus = COUNTER_POTENCY * resourceRatio;
+                Debug.Log($"FastEnemy Bonus Calculation: {COUNTER_POTENCY} * ({totalResourceThreat} / {grandTotalThreat}) = {counterBonus}");
             }
+            // Tank Enemies get a bonus directly proportional to the Mortar Tower threat.
             else if (enemyData.enemyPrefab.GetComponent<TankEnemy>())
             {
-                if (mortarTowers > 1) currentWeight *= weightModifiers.vsMortarTowers_TankEnemy_Modifier;
-                if (laserTowers > 2) currentWeight *= weightModifiers.vsLaserTowers_TankEnemy_Reducer;
+                float mortarRatio = totalMortarThreat / grandTotalThreat;
+                counterBonus = COUNTER_POTENCY * mortarRatio;
+                Debug.Log($"TankEnemy Bonus Calculation: {COUNTER_POTENCY} * ({totalMortarThreat} / {grandTotalThreat}) = {counterBonus}");
             }
+            // Basic Enemies get a bonus directly proportional to the Laser Tower threat.
             else if (enemyData.enemyPrefab.GetComponent<BasicEnemy>())
             {
-                 if (laserTowers > 1) currentWeight *= weightModifiers.vsLaserTowers_Swarm_Modifier;
+                float laserRatio = totalLaserThreat / grandTotalThreat;
+                counterBonus = COUNTER_POTENCY * laserRatio;
+                Debug.Log($"BasicEnemy Bonus Calculation: {COUNTER_POTENCY} * ({totalLaserThreat} / {grandTotalThreat}) = {counterBonus}");
             }
-            weights[enemyData.enemyPrefab] = currentWeight;
+
+            // The final weight is simply the base + its calculated bonus. No more complex interactions.
+            float finalWeight = enemyData.baseSpawnWeight + counterBonus;
+            weights[enemyData.enemyPrefab] = Mathf.Max(1f, finalWeight);
         }
+    
+        // Log the final weights for debugging
+        foreach(var w in weights) { Debug.Log($"--- Final Weight for {w.Key.name}: {w.Value}"); }
+
         return weights;
     }
 
@@ -222,15 +288,40 @@ public class WaveManager : MonoBehaviour
         return weights.Keys.First(); // Fallback
     }
 
+    // FIX: Removed the old, unused SpawnWave method. The Coroutine below is used instead.
+    /*
     private void SpawnWave(List<GameObject> waveComposition)
+    { ... }
+    */
+
+    private IEnumerator SpawnWaveRoutine(WaveComposition wave)
     {
         if (spawnPoints.Count == 0)
         {
-            Debug.LogError("No spawn points assigned in WaveManager!");
-            return;
+            Debug.LogError("No spawn points have been registered with the WaveManager!");
+            yield break; // Stop the coroutine
         }
 
-        foreach (GameObject enemyPrefab in waveComposition)
+        // --- PHASE 1: SPAWN TANKS ---
+        Debug.Log($"Spawning {wave.TanksToSpawn.Count} tanks...");
+        foreach (GameObject enemyPrefab in wave.TanksToSpawn)
+        {
+            Transform randomSpawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];
+            GameObject enemyGO = Instantiate(enemyPrefab, randomSpawnPoint.position, randomSpawnPoint.rotation);
+            activeEnemies.Add(enemyGO.GetComponent<BaseEnemy>());
+        }
+
+        // --- PHASE 2: WAIT (if necessary) ---
+        // Only wait if there were tanks AND there are other enemies to spawn.
+        if (wave.TanksToSpawn.Count > 0 && wave.OtherEnemiesToSpawn.Count > 0)
+        {
+            Debug.Log($"Waiting for {tankHeadstartDelay} seconds...");
+            yield return new WaitForSeconds(tankHeadstartDelay);
+        }
+
+        // --- PHASE 3: SPAWN THE REST ---
+        Debug.Log($"Spawning {wave.OtherEnemiesToSpawn.Count} other enemies...");
+        foreach (GameObject enemyPrefab in wave.OtherEnemiesToSpawn)
         {
             Transform randomSpawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];
             GameObject enemyGO = Instantiate(enemyPrefab, randomSpawnPoint.position, randomSpawnPoint.rotation);

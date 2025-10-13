@@ -1597,12 +1597,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1960fcfd75f0417c8ae6a22dc37f446b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  maxHealth: 200
   attackRange: 15
-  fireRate: 0.5
+  fireRate: 0.2
   rotationSpeed: 10
   partToRotate: {fileID: 1948436055725293266}
-  threatValue: 10
+  threatValue: 4
   healthBar: {fileID: 7507784578408740034}
   mortarProjectilePrefab: {fileID: 8731537507784323220, guid: b63fe969a2120a043943f8e25998d667,
     type: 3}

@@ -18,11 +18,20 @@ public class ResourceTower : BaseTower
     // running the FindTarget() or TrackTarget() logic.
     protected override void Update()
     {
-        // Instead of attacking, we run our own generation logic.
-        generationCooldown -= Time.deltaTime;
-        if (generationCooldown <= 0f)
+        // Only tick down the cooldown if the game is in the Combat phase.
+        if (WaveManager.Instance != null && WaveManager.Instance.CurrentState == WaveManager.WaveState.Combat)
         {
-            GenerateResources();
+            // Instead of attacking, we run our own generation logic.
+            generationCooldown -= Time.deltaTime;
+            if (generationCooldown <= 0f)
+            {
+                GenerateResources();
+                generationCooldown = generationInterval;
+            }
+        }
+        else
+        {
+            // Optional: If not in combat, ensure the cooldown is reset for the start of the next wave.
             generationCooldown = generationInterval;
         }
     }

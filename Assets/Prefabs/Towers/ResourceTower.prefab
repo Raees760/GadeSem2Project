@@ -344,7 +344,7 @@ MonoBehaviour:
   fireRate: 0
   rotationSpeed: 10
   partToRotate: {fileID: 1948436055725293266}
-  threatValue: 3
+  threatValue: 5
   healthBar: {fileID: 7507784578408740034}
   goldPerInterval: 40
   generationInterval: 5
