@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76bc381696a8494479279d78997df71a, type: 3}
+  m_Name: End
+  m_EditorClassIdentifier: 
+  tileName: End
+  prefab: {fileID: 1031929386807807045, guid: ee45e4d7fb29daf4fb0d565c56b8c458, type: 3}
+  north: 0
+  south: 0
+  east: 1
+  west: 0
+  weight: 1
+  rotation: 0
