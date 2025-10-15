@@ -1,5 +1,3 @@
-// MortarProjectile.cs
-
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -53,7 +51,7 @@ public class MortarProjectile : MonoBehaviour
         else
         {
             // If there's no target, destroy the projectile
-            //Destroy(gameObject);
+            Destroy(gameObject);
             return;
         }
 
@@ -61,7 +59,7 @@ public class MortarProjectile : MonoBehaviour
         float totalDistance = Vector3.Distance(startPosition, currentDestination);
         if (totalDistance > 0)
         {
-            journeyProgress += (speed * Time.deltaTime) / totalDistance;
+            journeyProgress += (speed * Time.deltaTime) / totalDistance; // distance travelled/total distance
         }
 
         if (journeyProgress >= 1f)

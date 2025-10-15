@@ -7,7 +7,7 @@ public class LaserTower : BaseTower
     [SerializeField] private float damageOverTime = 30f;
     [SerializeField] private Transform firePoint;
     [SerializeField] private float targetAcquisitionDelay = 1f; // The delay before finding a new target. This makes target weak to swarms
-    [SerializeField] private ParticleSystem impactEffect; // Optional particle effect at point of impact
+    [SerializeField] private ParticleSystem impactEffect; // particle effect at point of impact
 
     private LineRenderer lineRenderer;
     private float searchCooldown; // The internal timer for the delay
@@ -20,7 +20,6 @@ public class LaserTower : BaseTower
         searchCooldown = 0f;
     }
 
-    // We override Update to handle the continuous laser logic
     protected override void Update()
     {
         // We still need to find and track a target
@@ -73,7 +72,6 @@ public class LaserTower : BaseTower
         }
     }
 
-    // This tower doesn't have a single "attack" moment, so this is left blank.
     protected override void Attack()
     {
         // Intentionally left blank because the laser logic is in Update()
