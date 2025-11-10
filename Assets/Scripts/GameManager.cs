@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -22,6 +23,26 @@ public class GameManager : MonoBehaviour
             return;
         }
         Instance = this;
+    }
+
+    private void Update()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            // Check if the upgrade panel is open and the click was NOT on a UI element.
+            if (TowerUIManager.Instance != null && TowerUIManager.Instance.IsPanelOpen && !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+            {
+                // Fire a ray from the camera to see what we clicked on.
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                // We only care if we hit *something*. If we hit a tower, OnMouseDown on that tower will handle it.
+                // if we hit anything else (terrain, or nothing at all), we close the panel.
+                // a simple way is to check if we DIDN'T hit a tower.
+                if (!Physics.Raycast(ray, out RaycastHit hit) || hit.collider.GetComponent<BaseTower>() == null)
+                {
+                    TowerUIManager.Instance.HideUpgradePanel();
+                }
+            }
+        }
     }
 
     void Start()

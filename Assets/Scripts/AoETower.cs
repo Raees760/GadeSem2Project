@@ -33,4 +33,20 @@ public class AoETower : BaseTower
             }
         }
     }
+    
+    protected override void OnUpgradeApplied(GameObject newVisuals)
+    {
+        base.OnUpgradeApplied(newVisuals); 
+
+        TowerFirePoint foundPoint = newVisuals.GetComponentInChildren<TowerFirePoint>();
+        if (foundPoint != null)
+        {
+            this.firePoint = foundPoint.transform;
+        }
+        else
+        {
+            Debug.LogWarning($"No Fire Point found on new visuals for {gameObject.name}");
+            this.firePoint = null;
+        }
+    }
 }

@@ -1,5 +1,6 @@
 // BaseEnemy.cs
 
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -17,18 +18,36 @@ public class BaseEnemy : MonoBehaviour
     [SerializeField] protected int moneyReward = 10;
 
     [Header("UI")]
-    [SerializeField] private HealthBar healthBar;
+    [SerializeField] protected HealthBar healthBar;
 
     protected NavMeshAgent agent;
     protected Transform currentTarget;
     private float attackCooldown = 0f;
+    
+    [Header("HitFX")]
+    private MaterialPropertyBlock propBlock;
+    private Renderer[] objectRenderers;
+    private Coroutine flashCoroutine;
 
-    protected virtual void Start()
+
+   /* protected virtual void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         health = maxHealth;
-    }
+        
+        propBlock = new MaterialPropertyBlock();
+        objectRenderers = GetComponentsInChildren<Renderer>();
+    }*/
+    protected virtual void Awake()
+    {
+        agent = GetComponent<NavMeshAgent>();
+        health = maxHealth;
 
+        // Flash Hit
+        propBlock = new MaterialPropertyBlock();
+        objectRenderers = GetComponentsInChildren<Renderer>();
+    }
+    
     protected virtual void Update()
     {
         // If we don't have a target, or our target was destroyed, find a new one.
@@ -122,12 +141,46 @@ public class BaseEnemy : MonoBehaviour
     {
         health -= amount;
         healthBar.UpdateHealth(health, maxHealth);
+        
+        if (flashCoroutine != null) StopCoroutine(flashCoroutine);
+        flashCoroutine = StartCoroutine(FlashRoutine());
+        
         if (health <= 0)
         {
             Die();
         }
+        
     }
 
+    private IEnumerator FlashRoutine()
+    {
+        foreach (var renderer in objectRenderers)
+        {
+            renderer.GetPropertyBlock(propBlock);
+            propBlock.SetFloat("_FlashAmount", 1f);
+            renderer.SetPropertyBlock(propBlock);
+        }
+    
+        float duration = 0.25f;
+        float time = 0;
+        while(time < duration)
+        {
+            float flashAmount = Mathf.Lerp(1f, 0f, time / duration);
+            foreach (var renderer in objectRenderers)
+            {
+                propBlock.SetFloat("_FlashAmount", flashAmount);
+                renderer.SetPropertyBlock(propBlock);
+            }
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        foreach (var renderer in objectRenderers)
+        {
+            propBlock.SetFloat("_FlashAmount", 0f);
+            renderer.SetPropertyBlock(propBlock);
+        }
+    }
     protected virtual void Die()
     {
         Destroy(gameObject);

@@ -5,9 +5,9 @@ public class TankEnemy : BaseEnemy
     [Header("Tank Specifics")]
     [SerializeField] private float speedModifier = 0.5f; // Moves slow
 
-    protected override void Start()
+    protected override void Awake()
     {
-        base.Start();
+        base.Awake();
         // Tanks are slower but have more health. The health is set in the inspector on the prefab
         if (agent != null)
         {

@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 088fad8488b8433da1dd4a0dc257a9e6, type: 3}
+  m_Name: MainTower_Path
+  m_EditorClassIdentifier: 
+  levels:
+  - upgradeCost: 50
+    maxHealth: 70
+    fireRate: 4
+    attackRange: 15
+    threatValue: 5
+    visualPrefab: {fileID: 3141603538919947785, guid: 3706327674c0ff641b7f805a6f0eb157,
+      type: 3}
+  - upgradeCost: 100
+    maxHealth: 140
+    fireRate: 8
+    attackRange: 15
+    threatValue: 15
+    visualPrefab: {fileID: 2477800109437338637, guid: b2cc0c3ce225ccd468e71ce1e259ffe4,
+      type: 3}
+  - upgradeCost: 150
+    maxHealth: 210
+    fireRate: 16
+    attackRange: 15
+    threatValue: 30
+    visualPrefab: {fileID: 6316092501530884270, guid: 735e8af3899193a40a2975299e043d01,
+      type: 3}

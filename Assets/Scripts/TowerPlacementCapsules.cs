@@ -7,12 +7,19 @@ public class TowerPlacementCapsules : MonoBehaviour
 
     void OnMouseDown()
     {
+        
+        if (TowerUIManager.Instance != null && TowerUIManager.Instance.IsPanelOpen)
+        {
+            return;
+        }
+
         // Check if the mouse is currently over a UI element.
         // If it is, do not proceed with placing the tower.
         if (EventSystem.current.IsPointerOverGameObject())
         {
             return; 
         }
+        
         // Check if a tower has been selected from the shop
         if (BuildManager.Instance.SelectedTowerPrefab == null)
         {

@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 088fad8488b8433da1dd4a0dc257a9e6, type: 3}
+  m_Name: ResourceTower_Path 1
+  m_EditorClassIdentifier: 
+  levels:
+  - upgradeCost: 70
+    maxHealth: 70
+    fireRate: 1
+    attackRange: 15
+    threatValue: 5
+    visualPrefab: {fileID: 8564033905760375485, guid: e7d05c9003daaf540b35bac7d452046d,
+      type: 3}
+  - upgradeCost: 150
+    maxHealth: 140
+    fireRate: 1.5
+    attackRange: 15
+    threatValue: 8
+    visualPrefab: {fileID: 8538297799185746499, guid: 2bdf2694ba9b2584696dfb6c1f055102,
+      type: 3}
+  - upgradeCost: 220
+    maxHealth: 210
+    fireRate: 2
+    attackRange: 15
+    threatValue: 11
+    visualPrefab: {fileID: 5675697174648166599, guid: 30351759ad451a7458092cd556de2351,
+      type: 3}

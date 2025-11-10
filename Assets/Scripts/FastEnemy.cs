@@ -5,9 +5,9 @@ public class FastEnemy : BaseEnemy
     [Header("Fast Enemy Specifics")]
     [SerializeField] private float speedModifier = 2.0f; // Moves at double the speed
 
-    protected override void Start()
+    protected override void Awake()
     {
-        base.Start();
+        base.Awake();
         // Fast enemies are quicker but have less health.
         if (agent != null)
         {

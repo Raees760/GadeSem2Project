@@ -54,7 +54,7 @@ public class LaserTower : BaseTower
     private void Laser()
     {
         // Apply damage over time
-        target.GetComponent<BaseEnemy>().TakeDamage(damageOverTime * Time.deltaTime);
+        target.GetComponent<BaseEnemy>().TakeDamage(damageOverTime * FireRate* Time.deltaTime);
 
         // Visuals
         if (!lineRenderer.enabled)
@@ -97,4 +97,21 @@ public class LaserTower : BaseTower
             if (impactEffect != null) impactEffect.Stop();
         }
     }
+    
+    protected override void OnUpgradeApplied(GameObject newVisuals)
+    {
+        base.OnUpgradeApplied(newVisuals); 
+
+        TowerFirePoint foundPoint = newVisuals.GetComponentInChildren<TowerFirePoint>();
+        if (foundPoint != null)
+        {
+            this.firePoint = foundPoint.transform;
+        }
+        else
+        {
+            Debug.LogWarning($"No Fire Point found on new visuals for {gameObject.name}");
+            this.firePoint = null;
+        }
+    }
+
 }

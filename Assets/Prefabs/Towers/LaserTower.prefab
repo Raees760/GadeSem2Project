@@ -123,7 +123,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4053218169236663787
 Transform:
   m_ObjectHideFlags: 0
@@ -228,7 +228,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1550191924440048927
 Transform:
   m_ObjectHideFlags: 0
@@ -371,7 +371,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6743462546035635612
 Transform:
   m_ObjectHideFlags: 0
@@ -484,7 +484,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.55, y: 0.55, z: 0.55}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 7296079511739667162}
@@ -510,7 +510,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1948436055725293266
 Transform:
   m_ObjectHideFlags: 0
@@ -787,7 +787,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8628493790685723792
 Transform:
   m_ObjectHideFlags: 0
@@ -1102,7 +1102,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7296079511739667162
 Transform:
   m_ObjectHideFlags: 0
@@ -1305,6 +1305,7 @@ GameObject:
   - component: {fileID: 3875402447802915039}
   - component: {fileID: 7139224664161819121}
   - component: {fileID: 1685932145852249634}
+  - component: {fileID: 5077525183720718932}
   m_Layer: 0
   m_Name: LaserTower
   m_TagString: OffensiveTower
@@ -1445,17 +1446,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a684dbc3626348ceb1b4981fc7cee4c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 200
-  attackRange: 15
-  fireRate: 1
+  upgradePath: {fileID: 11400000, guid: 8b531a87ad1fc38498121cb8dd6cfd7d, type: 2}
+  visualsParent: {fileID: 3684776928873641427}
   rotationSpeed: 10
   partToRotate: {fileID: 1948436055725293266}
-  threatValue: 6
   healthBar: {fileID: 7507784578408740034}
   damageOverTime: 60
   firePoint: {fileID: 4274120026067934643}
   targetAcquisitionDelay: 1
   impactEffect: {fileID: 0}
+--- !u!65 &5077525183720718932
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8221211326329536715}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 2.6263459, z: 1.3131473}
+  m_Center: {x: 0, y: 1.2698516, z: 0.04678628}
 --- !u!1 &8859866622268763616
 GameObject:
   m_ObjectHideFlags: 0

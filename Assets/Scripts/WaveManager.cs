@@ -22,6 +22,10 @@ public class WaveManager : MonoBehaviour
     [SerializeField] private float tankHeadstartDelay = 2.0f; // Delay after tanks spawn
     [SerializeField] private List<EnemySpawnData> enemyTypes = new List<EnemySpawnData>();
     
+    [Header("Elite Wave Configuration")]
+    [SerializeField] private GameObject eliteEnemyPrefab;
+    [SerializeField] private int eliteWaveInterval = 5; // An Elite appears every 5 waves
+    
     //A private list to dynamically hold the registered spawn points.
     private List<Transform> spawnPoints = new List<Transform>();
 
@@ -101,9 +105,17 @@ public class WaveManager : MonoBehaviour
         UIManager.Instance.ShowStartWaveButton(true);
         Debug.Log($"Starting Preparation for Wave {waveNumber}");
 
-        // FIX: Generate the wave here, based on the state of the board *before* the prep phase.
+        // Generate the wave here, based on the state of the board *before* the prep phase.
         // The result is stored and will be used when the combat phase begins.
-        nextWaveComposition = GenerateWave();
+        if (waveNumber % eliteWaveInterval != 0)
+        {
+            nextWaveComposition = GenerateWave();
+        }
+        else
+        {
+            nextWaveComposition = null; 
+            UIManager.Instance.ShowFeedbackMessage("Warning: An Elite is approaching!");
+        }
     }
 
     private void StartCombatPhase()
@@ -113,14 +125,24 @@ public class WaveManager : MonoBehaviour
         UIManager.Instance.UpdateCountdownText(0);
         Debug.Log($"Starting Combat for Wave {waveNumber}");
 
-        // FIX: The wave has already been generated. Spawn the pre-calculated wave.
-        if (nextWaveComposition != null)
+        // Check if this is an Elite Wave
+        if (waveNumber > 0 && waveNumber % eliteWaveInterval == 0)
         {
-            StartCoroutine(SpawnWaveRoutine(nextWaveComposition));
+            // Elite Wave
+            Debug.Log("ELITE WAVE");
+            SpawnEliteWave();
         }
         else
         {
-            Debug.LogError("Next wave composition was not generated. Cannot start combat phase.");
+            // It's a normal wave.
+            if (nextWaveComposition != null)
+            {
+                StartCoroutine(SpawnWaveRoutine(nextWaveComposition));
+            }
+            else
+            {
+                Debug.LogError("Next wave composition was not generated. Cannot start combat phase.");
+            }
         }
     }
 
@@ -128,8 +150,14 @@ public class WaveManager : MonoBehaviour
     {
         CurrentState = WaveState.WaveComplete;
         Debug.Log($"Wave {waveNumber} Complete!");
-        // Add a small delay before starting the next prep phase
-        Invoke("StartPreparationPhase", 3f);
+        
+        StartCoroutine(WaveCompleteRoutine());
+    }
+    private IEnumerator WaveCompleteRoutine()
+    {
+        // Add a small delay before starting the next prep phase.
+        yield return new WaitForSeconds(3f);
+        StartPreparationPhase();
     }
     
     private WaveComposition GenerateWave()
@@ -208,7 +236,7 @@ public class WaveManager : MonoBehaviour
         BaseTower[] allTowers = FindObjectsOfType<BaseTower>();
         foreach (BaseTower tower in allTowers)
         {
-            totalThreat += tower.threatValue;
+            totalThreat += tower.ThreatValue;
         }
         return totalThreat;
     }
@@ -224,9 +252,9 @@ public class WaveManager : MonoBehaviour
         BaseTower[] allTowers = FindObjectsOfType<BaseTower>();
         foreach(var tower in allTowers)
         {
-            if (tower is ResourceTower) totalResourceThreat += tower.threatValue;
-            else if (tower is AoETower) totalMortarThreat += tower.threatValue;
-            else if (tower is LaserTower) totalLaserThreat += tower.threatValue;
+            if (tower is ResourceTower) totalResourceThreat += tower.ThreatValue;
+            else if (tower is AoETower) totalMortarThreat += tower.ThreatValue;
+            else if (tower is LaserTower) totalLaserThreat += tower.ThreatValue;
         }
 
         // The total of all specialist threats. This is the denominator.
@@ -328,6 +356,31 @@ public class WaveManager : MonoBehaviour
             Transform randomSpawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];
             GameObject enemyGO = Instantiate(enemyPrefab, randomSpawnPoint.position, randomSpawnPoint.rotation);
             activeEnemies.Add(enemyGO.GetComponent<BaseEnemy>());
+        }
+    }
+    
+    private void SpawnEliteWave()
+    {
+        if (eliteEnemyPrefab == null || spawnPoints.Count == 0)
+        {
+            Debug.LogError("Elite Enemy Prefab or Spawn Points not set in WaveManager!");
+            return;
+        }
+
+        // Calculate Stat Budget
+        int statBudget = 50 + (waveNumber * 10);
+
+        Transform randomSpawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];
+        GameObject eliteGO = Instantiate(eliteEnemyPrefab, randomSpawnPoint.position, Quaternion.identity);
+        EliteEnemy eliteScript = eliteGO.GetComponent<EliteEnemy>();
+
+        if (eliteScript != null)
+        {
+            // Generate its stats and visuals
+            eliteScript.GenerateStatsAndVisuals(statBudget);
+        
+            // Add it to the active enemies list to be tracked
+            activeEnemies.Add(eliteScript);
         }
     }
 }

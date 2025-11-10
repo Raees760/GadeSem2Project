@@ -5,9 +5,11 @@ public class ResourceTower : BaseTower
     [Header("Resource Generation")]
     [SerializeField] private int goldPerInterval = 5;
     [SerializeField] private float generationInterval = 10f;
-
+    [SerializeField] private GameObject goldBurstEffectPrefab;
+    
     private float generationCooldown;
-
+    public int GoldPerInterval => goldPerInterval;
+    
     protected override void Start()
     {
         base.Start(); 
@@ -39,7 +41,8 @@ public class ResourceTower : BaseTower
     private void GenerateResources()
     {
         GameManager.Instance.AddMoney(goldPerInterval);
-        // Later may add particle effect or sound effect to let player know resource is generated
+        Instantiate(goldBurstEffectPrefab, transform.position, Quaternion.identity);
+        
         Debug.Log($"Resource Tower generated {goldPerInterval} gold.");
     }
 
@@ -47,4 +50,5 @@ public class ResourceTower : BaseTower
     {
         // Intentionally left blank becuase not an attacking tower
     }
+    
 }
